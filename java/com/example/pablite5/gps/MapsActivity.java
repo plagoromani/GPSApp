@@ -1,4 +1,7 @@
 package com.example.pablite5.gps;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
@@ -9,6 +12,9 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -25,15 +31,19 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,GoogleMap.OnMapClickListener,GoogleApiClient.OnConnectionFailedListener,GoogleApiClient.ConnectionCallbacks {
 
+
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,GoogleMap.OnMapClickListener,GoogleMap.OnMapLongClickListener,GoogleApiClient.OnConnectionFailedListener,GoogleApiClient.ConnectionCallbacks {
+
+
+    public final static int CODE=1;
     public static final int LOCATION_REQUEST_CODE = 1;
     private GoogleMap gMap;
-    public static double auxLat =42.237455;
-    public static double auxLng = -8.716203;
+    public static double auxLat =42.237460;
+    public static double auxLng = -8.716392;
     CircleOptions circle;
     public static Marker mark;
-    LatLng center = new LatLng(42.237441, -8.716197);
+    LatLng center = new LatLng(42.237460, -8.716392);
     int radio = 100;
     private GoogleApiClient apiClient;
     public static double latitud, longitud;
@@ -51,6 +61,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .addConnectionCallbacks(this)
                 .addApi(LocationServices.API)
                 .build();
+
+
+
     }
 
 
@@ -58,6 +71,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         gMap = googleMap;
         gMap.setOnMapClickListener(this);
+        gMap.setOnMapLongClickListener(this);
         LatLng marcaBusqueda = new LatLng(auxLat, auxLng);
         mark = gMap.addMarker(new MarkerOptions().position(marcaBusqueda).title("Marca").snippet("Marca Buscada"));
         gMap.moveCamera(CameraUpdateFactory.newLatLng(marcaBusqueda));
@@ -208,5 +222,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
         Log.e(LOGTAG, "ERROR CONEXIÓN");
+    }
+    private void instrucciones() {
+        AlertDialog.Builder build = new AlertDialog.Builder(this);
+        build.setTitle("Busca la marca");
+        build.setMessage(instrucciones);
+        build.setPositiveButton("Aceptar", null);
+        build.create();
+        build.show();
+    }
+
+    public String instrucciones = "Bienvenido.Preparate para buscar la marca escondida.\n" +
+            ".- Para empezar deberás activar la localización gps (en caso de no tenerla activada).\n" +
+            ".- Se mostrará un circulo, esa será el área que delimitará la zona de busqueda.\n" +
+            ".- Pulsando una vez en la pantalla se mostrará la distancia hasta la marca.\n" +
+            ".- Cuando estes a menos de 20 metros aparecerá un circulo menor que mostrará el area concreto de la marca.\n" +
+            ".- Manteniendo pulsado sobre la pantalla, aparecerá el scanner Qr para escanear la marca\n" +
+            "Buena suerte en la búsqueda,jugador.";
+
+
+    @Override
+    public void onMapLongClick(LatLng latLng) {
+        Intent intent = new Intent(MapsActivity.this, ScannerActivity.class);
+        startActivityForResult(intent,CODE);
     }
 }
